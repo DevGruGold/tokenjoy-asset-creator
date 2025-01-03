@@ -2,14 +2,26 @@ import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import NFTMintingForm from '../nft/NFTMintingForm';
+import { AssetType } from '@/types/xmrt';
 
 interface NFTDashboardProps {
   connectedWallet: string | null;
   step: number;
   children: React.ReactNode;
+  selectedType?: AssetType | null;
+  assetFields?: string[];
+  onMint?: (metadata: any) => Promise<void>;
 }
 
-const NFTDashboard: React.FC<NFTDashboardProps> = ({ connectedWallet, step, children }) => {
+const NFTDashboard: React.FC<NFTDashboardProps> = ({ 
+  connectedWallet, 
+  step, 
+  children,
+  selectedType,
+  assetFields = [],
+  onMint = async () => {},
+}) => {
   const { toast } = useToast();
 
   return (
@@ -26,7 +38,7 @@ const NFTDashboard: React.FC<NFTDashboardProps> = ({ connectedWallet, step, chil
         )}
 
         <div className="flex justify-between mb-8">
-          {[1, 2, 3, 4, 5].map((stepNum) => (
+          {[1, 2, 3].map((stepNum) => (
             <div 
               key={stepNum}
               className={`flex items-center justify-center w-8 h-8 rounded-full ${
@@ -39,7 +51,14 @@ const NFTDashboard: React.FC<NFTDashboardProps> = ({ connectedWallet, step, chil
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
-          {children}
+          {step === 2 && selectedType && (
+            <NFTMintingForm
+              assetType={selectedType}
+              assetFields={assetFields}
+              onMint={onMint}
+            />
+          )}
+          {step !== 2 && children}
         </div>
       </div>
     </div>

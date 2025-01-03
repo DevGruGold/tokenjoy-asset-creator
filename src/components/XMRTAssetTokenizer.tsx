@@ -134,29 +134,40 @@ const XMRTAssetTokenizer = () => {
     });
   };
 
-  const handleMint = async () => {
+  const handleMint = async (metadata: any) => {
     if (!connectedWallet) {
-      alert('Please connect your wallet first');
+      toast({
+        title: "Error",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
       return;
     }
 
     setMintingStatus('pending');
-    const tokenId = generateXMRTId(selectedType!, assetDetails);
+    const tokenId = generateXMRTId(selectedType!, metadata);
     
     try {
       const result = await mintXMRTToken(tokenId, {
-        ...assetDetails,
-        type: selectedType,
+        ...metadata,
         location,
         timestamp: Date.now(),
         targetWallet: TARGET_WALLET
       });
       
       setMintingStatus('complete');
-      setStep(5);
+      setStep(3);
+      toast({
+        title: "Success",
+        description: "Your NFT has been successfully minted!",
+      });
     } catch (error) {
       setMintingStatus('error');
-      console.error('Minting error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mint NFT. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -172,7 +183,13 @@ const XMRTAssetTokenizer = () => {
         connectionStatus={connectionStatus}
         connectedWallet={connectedWallet}
       />
-      <NFTDashboard connectedWallet={connectedWallet} step={step}>
+      <NFTDashboard 
+        connectedWallet={connectedWallet} 
+        step={step}
+        selectedType={selectedType}
+        assetFields={selectedType ? ASSET_TYPES[selectedType].fields : []}
+        onMint={handleMint}
+      >
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Select Asset Type</h2>
@@ -192,7 +209,7 @@ const XMRTAssetTokenizer = () => {
           </div>
         )}
 
-        {step === 5 && (
+        {step === 3 && (
           <div className="text-center space-y-4">
             <CheckCircle2 className="mx-auto text-green-500 h-16 w-16" />
             <h2 className="text-2xl font-bold">Asset Successfully Tokenized!</h2>
