@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import MetaMaskAuth from './auth/MetaMaskAuth';
+import WelcomeScreen from './welcome/WelcomeScreen';
 import NFTDashboard from './dashboard/NFTDashboard';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
 
@@ -77,6 +76,17 @@ const XMRTAssetTokenizer = () => {
       };
     }
   }, []);
+
+  // Only show the main content if wallet is connected
+  if (!connectedWallet || connectionStatus !== 'connected') {
+    return (
+      <WelcomeScreen
+        onConnect={handleConnectWallet}
+        connectionStatus={connectionStatus}
+        connectedWallet={connectedWallet}
+      />
+    );
+  }
 
   const ASSET_TYPES = {
     VEHICLE: {
@@ -177,69 +187,62 @@ const XMRTAssetTokenizer = () => {
   };
 
   return (
-    <>
-      <MetaMaskAuth
-        onConnect={handleConnectWallet}
-        connectionStatus={connectionStatus}
-        connectedWallet={connectedWallet}
-      />
-      <NFTDashboard 
-        connectedWallet={connectedWallet} 
-        step={step}
-        selectedType={selectedType}
-        assetFields={selectedType ? ASSET_TYPES[selectedType].fields : []}
-        onMint={handleMint}
-      >
-        {step === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Select Asset Type</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(ASSET_TYPES).map(([type, config]) => (
-                <button
-                  key={type}
-                  onClick={() => handleTypeSelect(type as AssetType)}
-                  className="p-6 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                >
-                  <div className="text-4xl mb-2">{config.icon}</div>
-                  <div className="font-medium">{type.replace('_', ' ')}</div>
-                  <div className="text-sm text-gray-500 mt-1">{config.xmrtPrefix}</div>
-                </button>
-              ))}
-            </div>
+    <NFTDashboard 
+      connectedWallet={connectedWallet} 
+      step={step}
+      selectedType={selectedType}
+      assetFields={selectedType ? ASSET_TYPES[selectedType].fields : []}
+      onMint={handleMint}
+    >
+      {step === 1 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Select Asset Type</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(ASSET_TYPES).map(([type, config]) => (
+              <button
+                key={type}
+                onClick={() => handleTypeSelect(type as AssetType)}
+                className="p-6 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+              >
+                <div className="text-4xl mb-2">{config.icon}</div>
+                <div className="font-medium">{type.replace('_', ' ')}</div>
+                <div className="text-sm text-gray-500 mt-1">{config.xmrtPrefix}</div>
+              </button>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {step === 3 && (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto text-green-500 h-16 w-16" />
-            <h2 className="text-2xl font-bold">Asset Successfully Tokenized!</h2>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-2">Token ID:</p>
-              <p className="font-mono text-blue-600">
-                {generateXMRTId(selectedType!, assetDetails)}
-              </p>
-            </div>
-            <p className="text-gray-600">
-              Your asset has been tokenized and linked to wallet:<br/>
-              <span className="font-mono text-sm">{TARGET_WALLET}</span>
+      {step === 3 && (
+        <div className="text-center space-y-4">
+          <CheckCircle2 className="mx-auto text-green-500 h-16 w-16" />
+          <h2 className="text-2xl font-bold">Asset Successfully Tokenized!</h2>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 mb-2">Token ID:</p>
+            <p className="font-mono text-blue-600">
+              {generateXMRTId(selectedType!, assetDetails)}
             </p>
-            <button
-              onClick={() => {
-                setStep(1);
-                setSelectedType(null);
-                setAssetDetails({});
-                setLocation('');
-                setVerificationStatus(null);
-                setMintingStatus(null);
-              }}
-              className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Tokenize Another Asset
-            </button>
           </div>
-        )}
-      </NFTDashboard>
-    </>
+          <p className="text-gray-600">
+            Your asset has been tokenized and linked to wallet:<br/>
+            <span className="font-mono text-sm">{TARGET_WALLET}</span>
+          </p>
+          <button
+            onClick={() => {
+              setStep(1);
+              setSelectedType(null);
+              setAssetDetails({});
+              setLocation('');
+              setVerificationStatus(null);
+              setMintingStatus(null);
+            }}
+            className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Tokenize Another Asset
+          </button>
+        </div>
+      )}
+    </NFTDashboard>
   );
 };
 
