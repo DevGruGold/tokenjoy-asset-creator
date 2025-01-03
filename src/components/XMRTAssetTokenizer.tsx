@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { CheckCircle } from 'lucide-react';
 import WelcomeScreen from './welcome/WelcomeScreen';
 import NFTDashboard from './dashboard/NFTDashboard';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
@@ -215,7 +216,7 @@ const XMRTAssetTokenizer = () => {
 
       {step === 3 && (
         <div className="text-center space-y-4">
-          <CheckCircle2 className="mx-auto text-green-500 h-16 w-16" />
+          <CheckCircle className="mx-auto text-green-500 h-16 w-16" />
           <h2 className="text-2xl font-bold">Asset Successfully Tokenized!</h2>
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-2">Token ID:</p>
