@@ -33,7 +33,10 @@ const NFTMintingForm: React.FC<NFTMintingFormProps> = ({ onMint, assetType, asse
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prevData => ({
+      ...prevData,
+      [field]: value
+    }));
   };
 
   const simulateUpload = async () => {
@@ -119,8 +122,12 @@ const NFTMintingForm: React.FC<NFTMintingFormProps> = ({ onMint, assetType, asse
             <Label htmlFor={field}>{field}</Label>
             <Input
               id={field}
+              type="text"
+              inputMode="text"
               placeholder={`Enter ${field.toLowerCase()}`}
+              value={formData[field] || ''}
               onChange={(e) => handleInputChange(field, e.target.value)}
+              className="w-full px-3 py-2"
               required
             />
           </div>
