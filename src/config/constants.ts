@@ -1,4 +1,6 @@
+export const CHAIN_ID = '0x1'; // Ethereum Mainnet
 export const TARGET_WALLET = '0xae2402dfdd313b8c40af06d3292b50de1ed75f68';
+export const NETWORK_NAME = 'Ethereum Main Network';
 
 export const ASSET_TYPES = {
   VEHICLE: {

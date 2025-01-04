@@ -6,6 +6,7 @@ import SuccessScreen from './success/SuccessScreen';
 import { connectMetaMask } from '@/utils/metamask';
 import { ASSET_TYPES, TARGET_WALLET } from '@/config/constants';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
+import { mintNFTToCollection } from '@/utils/smartContract';
 
 const XMRTAssetTokenizer = () => {
   const { toast } = useToast();
@@ -73,15 +74,22 @@ const XMRTAssetTokenizer = () => {
   };
 
   const mintXMRTToken = async (tokenId: string, metadata: any) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          tokenId,
-          transaction: `0x${Math.random().toString(36).substring(2, 40)}`,
-          timestamp: Date.now()
-        });
-      }, 2000);
-    });
+    try {
+      // Create token URI (you might want to host this metadata on IPFS in production)
+      const tokenURI = `data:application/json;base64,${btoa(JSON.stringify(metadata))}`;
+      
+      // Mint the NFT using our smart contract
+      const transaction = await mintNFTToCollection(tokenURI);
+      
+      return {
+        tokenId,
+        transaction: transaction.hash,
+        timestamp: Date.now()
+      };
+    } catch (error) {
+      console.error('Error minting token:', error);
+      throw error;
+    }
   };
 
   const handleMint = async (metadata: any) => {
