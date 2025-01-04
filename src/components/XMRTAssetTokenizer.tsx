@@ -1,33 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle } from 'lucide-react';
 import WelcomeScreen from './welcome/WelcomeScreen';
 import NFTDashboard from './dashboard/NFTDashboard';
+import SuccessScreen from './success/SuccessScreen';
+import { connectMetaMask } from '@/utils/metamask';
+import { ASSET_TYPES, TARGET_WALLET } from '@/config/constants';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
-
-const TARGET_WALLET = '0xfdcfb99cb7b8f284cc310eae4cf4026484750210';
-
-const connectMetaMask = async () => {
-  try {
-    // Check if we're on mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      return accounts[0];
-    } else if (isMobile) {
-      // Deep link to MetaMask
-      const dappUrl = window.location.href;
-      const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
-      window.location.href = metamaskAppDeepLink;
-      throw new Error('Redirecting to MetaMask mobile app...');
-    }
-    throw new Error('MetaMask not found');
-  } catch (error) {
-    console.error('MetaMask connection error:', error);
-    throw error;
-  }
-};
 
 const XMRTAssetTokenizer = () => {
   const { toast } = useToast();
@@ -86,54 +64,6 @@ const XMRTAssetTokenizer = () => {
       };
     }
   }, []);
-
-  // Only show the main content if wallet is connected
-  if (!connectedWallet || connectionStatus !== 'connected') {
-    return (
-      <WelcomeScreen
-        onConnect={handleConnectWallet}
-        connectionStatus={connectionStatus}
-        connectedWallet={connectedWallet}
-      />
-    );
-  }
-
-  const ASSET_TYPES = {
-    VEHICLE: {
-      icon: '🚗',
-      fields: ['VIN', 'Make', 'Model', 'Year', 'Color', 'Mileage'],
-      chain: {
-        CA: 'avalanche',
-        default: 'ethereum'
-      },
-      xmrtPrefix: 'XMRT-VEH'
-    },
-    REAL_ESTATE: {
-      icon: '🏠',
-      fields: ['Address', 'Parcel Number', 'Square Footage', 'Year Built', 'Property Type'],
-      chain: {
-        CA: 'avalanche',
-        default: 'ethereum'
-      },
-      xmrtPrefix: 'XMRT-RE'
-    },
-    ART: {
-      icon: '🎨',
-      fields: ['Title', 'Artist', 'Medium', 'Year Created', 'Dimensions'],
-      chain: {
-        default: 'ethereum'
-      },
-      xmrtPrefix: 'XMRT-ART'
-    },
-    COLLECTIBLE: {
-      icon: '💎',
-      fields: ['Name', 'Category', 'Condition', 'Year', 'Serial Number'],
-      chain: {
-        default: 'ethereum'
-      },
-      xmrtPrefix: 'XMRT-COL'
-    }
-  };
 
   const generateXMRTId = (type: AssetType, details: AssetDetails) => {
     const prefix = ASSET_TYPES[type].xmrtPrefix;
@@ -196,6 +126,26 @@ const XMRTAssetTokenizer = () => {
     setStep(2);
   };
 
+  const handleReset = () => {
+    setStep(1);
+    setSelectedType(null);
+    setAssetDetails({});
+    setLocation('');
+    setVerificationStatus(null);
+    setMintingStatus(null);
+  };
+
+  // Only show the main content if wallet is connected
+  if (!connectedWallet || connectionStatus !== 'connected') {
+    return (
+      <WelcomeScreen
+        onConnect={handleConnectWallet}
+        connectionStatus={connectionStatus}
+        connectedWallet={connectedWallet}
+      />
+    );
+  }
+
   return (
     <NFTDashboard 
       connectedWallet={connectedWallet} 
@@ -224,33 +174,12 @@ const XMRTAssetTokenizer = () => {
       )}
 
       {step === 3 && (
-        <div className="text-center space-y-4">
-          <CheckCircle className="mx-auto text-green-500 h-16 w-16" />
-          <h2 className="text-2xl font-bold">Asset Successfully Tokenized!</h2>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Token ID:</p>
-            <p className="font-mono text-blue-600">
-              {generateXMRTId(selectedType!, assetDetails)}
-            </p>
-          </div>
-          <p className="text-gray-600">
-            Your asset has been tokenized and linked to wallet:<br/>
-            <span className="font-mono text-sm">{TARGET_WALLET}</span>
-          </p>
-          <button
-            onClick={() => {
-              setStep(1);
-              setSelectedType(null);
-              setAssetDetails({});
-              setLocation('');
-              setVerificationStatus(null);
-              setMintingStatus(null);
-            }}
-            className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Tokenize Another Asset
-          </button>
-        </div>
+        <SuccessScreen
+          selectedType={selectedType!}
+          assetDetails={assetDetails}
+          onReset={handleReset}
+          generateXMRTId={generateXMRTId}
+        />
       )}
     </NFTDashboard>
   );
