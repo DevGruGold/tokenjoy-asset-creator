@@ -1,7 +1,12 @@
 import XMRTAssetTokenizer from '@/components/XMRTAssetTokenizer';
+import Layout from '@/components/layout/Layout';
 
 const Index = () => {
-  return <XMRTAssetTokenizer />;
+  return (
+    <Layout>
+      <XMRTAssetTokenizer />
+    </Layout>
+  );
 };
 
 export default Index;
