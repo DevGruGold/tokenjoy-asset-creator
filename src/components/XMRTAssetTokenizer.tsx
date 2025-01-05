@@ -73,7 +73,7 @@ const XMRTAssetTokenizer = () => {
   };
 
   const handleMint = async (metadata: any) => {
-    if (!connectedWallet) {
+    if (!address) {
       toast({
         title: "Error",
         description: "Please connect your wallet first",
