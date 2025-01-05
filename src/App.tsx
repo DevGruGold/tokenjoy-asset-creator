@@ -9,8 +9,7 @@ import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/react';
 import Index from "./pages/Index";
 
-// 1. Get projectId at https://cloud.walletconnect.com
-const projectId = 'YOUR_PROJECT_ID';
+const projectId = 'b59c16c98b22d36a30ec986c5e28dde6';
 
 const chains = [mainnet, polygon];
 const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
