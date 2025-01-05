@@ -3,13 +3,15 @@ import { useToast } from "@/hooks/use-toast";
 import WelcomeScreen from './welcome/WelcomeScreen';
 import NFTDashboard from './dashboard/NFTDashboard';
 import SuccessScreen from './success/SuccessScreen';
-import { connectMetaMask } from '@/utils/metamask';
+import ContractInitializer from './contract/ContractInitializer';
 import { ASSET_TYPES, TARGET_WALLET } from '@/config/constants';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
 import { mintNFTToCollection } from '@/utils/smartContract';
+import { useWeb3Modal } from '@web3modal/react';
 
 const XMRTAssetTokenizer = () => {
   const { toast } = useToast();
+  const { open } = useWeb3Modal();
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<AssetType | null>(null);
   const [assetDetails, setAssetDetails] = useState<AssetDetails>({});
@@ -18,17 +20,21 @@ const XMRTAssetTokenizer = () => {
   const [mintingStatus, setMintingStatus] = useState<string | null>(null);
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [isContractDeployed, setIsContractDeployed] = useState(false);
 
   const handleConnectWallet = async () => {
     try {
       setConnectionStatus('connecting');
-      const account = await connectMetaMask();
-      setConnectedWallet(account);
-      setConnectionStatus('connected');
-      toast({
-        title: "Wallet Connected",
-        description: "Successfully connected to MetaMask",
-      });
+      await open();
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts[0]) {
+        setConnectedWallet(accounts[0]);
+        setConnectionStatus('connected');
+        toast({
+          title: "Wallet Connected",
+          description: "Successfully connected to MetaMask",
+        });
+      }
     } catch (error) {
       setConnectionStatus('error');
       toast({
@@ -53,6 +59,7 @@ const XMRTAssetTokenizer = () => {
         if (accounts.length === 0) {
           setConnectedWallet(null);
           setConnectionStatus('disconnected');
+          setIsContractDeployed(false);
         } else {
           setConnectedWallet(accounts[0]);
           setConnectionStatus('connected');
@@ -125,7 +132,8 @@ const XMRTAssetTokenizer = () => {
     }
   };
 
-  const handleTypeSelect = (type: AssetType) => {
+  const handleContractDeployed = (type: AssetType) => {
+    setIsContractDeployed(true);
     setSelectedType(type);
     setStep(2);
   };
@@ -137,6 +145,7 @@ const XMRTAssetTokenizer = () => {
     setLocation('');
     setVerificationStatus(null);
     setMintingStatus(null);
+    setIsContractDeployed(false);
   };
 
   if (!connectedWallet || connectionStatus !== 'connected') {
@@ -149,6 +158,10 @@ const XMRTAssetTokenizer = () => {
     );
   }
 
+  if (connectionStatus === 'connected' && !isContractDeployed) {
+    return <ContractInitializer onContractDeployed={handleContractDeployed} />;
+  }
+
   return (
     <NFTDashboard 
       connectedWallet={connectedWallet} 
@@ -157,25 +170,6 @@ const XMRTAssetTokenizer = () => {
       assetFields={selectedType ? ASSET_TYPES[selectedType].fields : []}
       onMint={handleMint}
     >
-      {step === 1 && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Select Asset Type</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(ASSET_TYPES).map(([type, config]) => (
-              <button
-                key={type}
-                onClick={() => handleTypeSelect(type as AssetType)}
-                className="p-6 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-              >
-                <div className="text-4xl mb-2">{config.icon}</div>
-                <div className="font-medium">{type.replace('_', ' ')}</div>
-                <div className="text-sm text-gray-500 mt-1">{config.xmrtPrefix}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {step === 3 && (
         <SuccessScreen
           selectedType={selectedType!}

@@ -17,12 +17,8 @@ const NFT_CONTRACT_ABI = [
 
 let deployedContract: ethers.Contract | null = null;
 
-export const initializeSmartContract = async () => {
+export const initializeSmartContract = async (name: string, symbol: string) => {
   if (!window.ethereum) throw new Error("MetaMask is not installed");
-  
-  if (deployedContract) {
-    return deployedContract;
-  }
   
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -44,8 +40,8 @@ export const initializeSmartContract = async () => {
   console.log("Setting collection parameters...");
   await collection.setCollectionParameters(
     TARGET_WALLET,
-    "XMRT Collection",
-    "XMRT"
+    name,
+    symbol
   );
   console.log("Collection parameters set");
 
@@ -54,9 +50,11 @@ export const initializeSmartContract = async () => {
 };
 
 export const mintNFTToCollection = async (tokenURI: string) => {
-  const contract = await initializeSmartContract();
+  if (!deployedContract) {
+    throw new Error("Contract not initialized");
+  }
   console.log("Minting NFT with URI:", tokenURI);
-  const tx = await contract.mint(TARGET_WALLET, tokenURI);
+  const tx = await deployedContract.mint(TARGET_WALLET, tokenURI);
   console.log("Waiting for transaction confirmation...");
   await tx.wait();
   console.log("NFT minted successfully:", tx.hash);
@@ -64,8 +62,10 @@ export const mintNFTToCollection = async (tokenURI: string) => {
 };
 
 export const getCollectionInfo = async () => {
-  const contract = await initializeSmartContract();
-  const name = await contract.name();
-  const symbol = await contract.symbol();
-  return { name, symbol, address: contract.address };
+  if (!deployedContract) {
+    throw new Error("Contract not initialized");
+  }
+  const name = await deployedContract.name();
+  const symbol = await deployedContract.symbol();
+  return { name, symbol, address: deployedContract.address };
 };
