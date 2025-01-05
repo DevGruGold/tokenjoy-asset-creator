@@ -1,6 +1,6 @@
 import { getAccount } from '@wagmi/core';
 
-export const connectWallet = async () => {
+export const connectMetaMask = async () => {
   try {
     const account = await getAccount();
     return account.address;

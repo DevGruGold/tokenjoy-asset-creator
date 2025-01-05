@@ -40,7 +40,7 @@ const XMRTAssetTokenizer = () => {
   };
 
   useEffect(() => {
-    if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
+    if (typeof window !== 'undefined' && window.ethereum) {
       window.ethereum.request({ method: 'eth_accounts' })
         .then(accounts => {
           if (accounts.length > 0) {
@@ -75,12 +75,8 @@ const XMRTAssetTokenizer = () => {
 
   const mintXMRTToken = async (tokenId: string, metadata: any) => {
     try {
-      // Create token URI (you might want to host this metadata on IPFS in production)
       const tokenURI = `data:application/json;base64,${btoa(JSON.stringify(metadata))}`;
-      
-      // Mint the NFT using our smart contract
       const transaction = await mintNFTToCollection(tokenURI);
-      
       return {
         tokenId,
         transaction: transaction.hash,
@@ -143,7 +139,6 @@ const XMRTAssetTokenizer = () => {
     setMintingStatus(null);
   };
 
-  // Only show the main content if wallet is connected
   if (!connectedWallet || connectionStatus !== 'connected') {
     return (
       <WelcomeScreen
