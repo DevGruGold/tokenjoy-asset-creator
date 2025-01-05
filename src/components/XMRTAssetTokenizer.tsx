@@ -8,17 +8,18 @@ import { ASSET_TYPES, TARGET_WALLET } from '@/config/constants';
 import { ConnectionStatus, AssetType, AssetDetails } from '@/types/xmrt';
 import { mintNFTToCollection } from '@/utils/smartContract';
 import { useWeb3Modal } from '@web3modal/react';
+import { useAccount } from 'wagmi';
 
 const XMRTAssetTokenizer = () => {
   const { toast } = useToast();
   const { open } = useWeb3Modal();
+  const { address, isConnected } = useAccount();
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<AssetType | null>(null);
   const [assetDetails, setAssetDetails] = useState<AssetDetails>({});
   const [location, setLocation] = useState('');
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [mintingStatus, setMintingStatus] = useState<string | null>(null);
-  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [isContractDeployed, setIsContractDeployed] = useState(false);
 
@@ -26,15 +27,6 @@ const XMRTAssetTokenizer = () => {
     try {
       setConnectionStatus('connecting');
       await open();
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts[0]) {
-        setConnectedWallet(accounts[0]);
-        setConnectionStatus('connected');
-        toast({
-          title: "Wallet Connected",
-          description: "Successfully connected to MetaMask",
-        });
-      }
     } catch (error) {
       setConnectionStatus('error');
       toast({
@@ -46,32 +38,17 @@ const XMRTAssetTokenizer = () => {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' })
-        .then(accounts => {
-          if (accounts.length > 0) {
-            setConnectedWallet(accounts[0]);
-            setConnectionStatus('connected');
-          }
-        });
-
-      const handleAccountsChanged = (accounts: string[]) => {
-        if (accounts.length === 0) {
-          setConnectedWallet(null);
-          setConnectionStatus('disconnected');
-          setIsContractDeployed(false);
-        } else {
-          setConnectedWallet(accounts[0]);
-          setConnectionStatus('connected');
-        }
-      };
-
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      return () => {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      };
+    if (isConnected && address) {
+      setConnectionStatus('connected');
+      toast({
+        title: "Wallet Connected",
+        description: "Successfully connected to wallet",
+      });
+    } else if (!isConnected) {
+      setConnectionStatus('disconnected');
+      setIsContractDeployed(false);
     }
-  }, []);
+  }, [isConnected, address, toast]);
 
   const generateXMRTId = (type: AssetType, details: AssetDetails) => {
     const prefix = ASSET_TYPES[type].xmrtPrefix;
@@ -148,12 +125,12 @@ const XMRTAssetTokenizer = () => {
     setIsContractDeployed(false);
   };
 
-  if (!connectedWallet || connectionStatus !== 'connected') {
+  if (!isConnected || connectionStatus !== 'connected') {
     return (
       <WelcomeScreen
         onConnect={handleConnectWallet}
         connectionStatus={connectionStatus}
-        connectedWallet={connectedWallet}
+        connectedWallet={address || null}
       />
     );
   }
@@ -164,7 +141,7 @@ const XMRTAssetTokenizer = () => {
 
   return (
     <NFTDashboard 
-      connectedWallet={connectedWallet} 
+      connectedWallet={address || null} 
       step={step}
       selectedType={selectedType}
       assetFields={selectedType ? ASSET_TYPES[selectedType].fields : []}
