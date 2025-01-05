@@ -2,6 +2,7 @@ import React from 'react';
 import { Wallet } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useWeb3Modal } from '@web3modal/react';
 
 interface MetaMaskAuthProps {
   onConnect: (account: string) => void;
@@ -14,10 +15,23 @@ const MetaMaskAuth: React.FC<MetaMaskAuthProps> = ({
   connectionStatus,
   connectedWallet,
 }) => {
+  const { open } = useWeb3Modal();
+
+  const handleConnect = async () => {
+    try {
+      await open();
+      if (connectedWallet) {
+        onConnect(connectedWallet);
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Button
-        onClick={() => onConnect(connectedWallet || '')}
+        onClick={handleConnect}
         className={`w-full text-lg py-6 ${
           connectionStatus === 'connected' 
             ? 'bg-green-500 hover:bg-green-600' 
@@ -30,14 +44,14 @@ const MetaMaskAuth: React.FC<MetaMaskAuthProps> = ({
           ? `Connected: ${connectedWallet?.slice(0, 6)}...${connectedWallet?.slice(-4)}` 
           : connectionStatus === 'connecting' 
             ? 'Connecting...' 
-            : 'Connect MetaMask'}
+            : 'Connect Wallet'}
       </Button>
 
       {connectionStatus === 'error' && (
         <Alert variant="destructive">
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
-            Failed to connect to MetaMask. Please make sure you have MetaMask installed and try again.
+            Failed to connect wallet. Please try again.
           </AlertDescription>
         </Alert>
       )}
