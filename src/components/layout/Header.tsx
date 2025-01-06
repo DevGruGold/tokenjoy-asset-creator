@@ -1,20 +1,16 @@
-import { Coins } from "lucide-react";
+import React from 'react';
+import WalletIndicator from '../wallet/WalletIndicator';
 
 const Header = () => {
   return (
-    <header className="bg-gradient-to-r from-xmrt-brand to-xmrt-hover text-white py-4 px-6 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Coins className="h-8 w-8" />
-          <div>
-            <h1 className="text-2xl font-bold">XMRT Asset Tokenizer</h1>
-            <p className="text-sm opacity-90">Secure Digital Asset Management</p>
-          </div>
+    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
+        <div className="flex gap-6 md:gap-10">
+          <a href="/" className="flex items-center space-x-2">
+            <span className="font-bold inline-block">XMRT Asset Tokenizer</span>
+          </a>
         </div>
-        <nav className="hidden md:flex items-center space-x-6">
-          <a href="#" className="hover:opacity-80 transition-opacity">Documentation</a>
-          <a href="#" className="hover:opacity-80 transition-opacity">Support</a>
-        </nav>
+        <WalletIndicator />
       </div>
     </header>
   );
