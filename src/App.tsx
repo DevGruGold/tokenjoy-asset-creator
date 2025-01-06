@@ -11,20 +11,22 @@ import Index from "./pages/Index";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <WagmiConfig config={wagmiConfig}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-        <Sonner />
-      </TooltipProvider>
-    </QueryClientProvider>
+  <>
+    <WagmiConfig config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </WagmiConfig>
     <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-  </WagmiConfig>
+  </>
 );
 
 export default App;
