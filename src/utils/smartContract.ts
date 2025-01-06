@@ -38,6 +38,9 @@ export const initializeSmartContract = async (name: string, symbol: string) => {
     await tx.wait();
     console.log("Contract initialized with name and symbol");
 
+    // Store the contract address for future use
+    localStorage.setItem('lastDeployedContract', contract.address);
+
     return contract.address;
   } catch (error) {
     console.error("Error deploying master contract:", error);
@@ -55,10 +58,13 @@ export const mintNFTToCollection = async (tokenURI: string) => {
     const signer = provider.getSigner();
     const address = await signer.getAddress();
 
-    // For this example, we're using the last deployed contract
-    // In a production environment, you'd want to store and retrieve the contract address
+    const contractAddress = localStorage.getItem('lastDeployedContract');
+    if (!contractAddress) {
+      throw new Error("No deployed contract found. Please deploy a master contract first.");
+    }
+
     const contract = new ethers.Contract(
-      localStorage.getItem('lastDeployedContract') || '',
+      contractAddress,
       MASTER_CONTRACT_ABI,
       signer
     );

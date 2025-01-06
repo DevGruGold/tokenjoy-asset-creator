@@ -46,6 +46,7 @@ const ContractInitializer: React.FC<ContractInitializerProps> = ({ onContractDep
       });
       onContractDeployed(selectedType);
     } catch (error) {
+      console.error('Contract deployment error:', error);
       toast({
         title: "Error",
         description: "Failed to deploy smart contract. Please try again.",
