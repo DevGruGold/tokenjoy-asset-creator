@@ -13,6 +13,7 @@ import {
 import { ASSET_TYPES } from '@/config/constants';
 import { AssetType } from '@/types/xmrt';
 import { initializeSmartContract } from '@/utils/smartContract';
+import ContractExplainer from './ContractExplainer';
 
 interface ContractInitializerProps {
   onContractDeployed: (contractType: AssetType) => void;
@@ -58,6 +59,7 @@ const ContractInitializer: React.FC<ContractInitializerProps> = ({ onContractDep
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-sm">
       <h2 className="text-2xl font-bold mb-6">Initialize Smart Contract</h2>
+      <ContractExplainer />
       <form onSubmit={handleDeploy} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="contractType">Asset Type</Label>
