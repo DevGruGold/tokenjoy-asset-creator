@@ -1,11 +1,11 @@
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { InfoCircled } from "lucide-react";
+import { CircleInfo } from "lucide-react";
 
 const ContractExplainer = () => {
   return (
     <Alert className="mb-6">
-      <InfoCircled className="h-4 w-4" />
+      <CircleInfo className="h-4 w-4" />
       <AlertTitle>Master Contract Deployment Required</AlertTitle>
       <AlertDescription className="mt-2 space-y-2">
         <p>
